@@ -2,7 +2,7 @@ use anyhow::Context;
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
 use std::fs;
-use std::io::{self, Write};
+use std::io::{self, Read, Write}; // Import trait `Read` here to be in scope
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
