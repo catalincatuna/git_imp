@@ -1,10 +1,7 @@
-// Removed the unused import 'anyhow::Context'
-#[allow(unused_imports)]
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
 use std::fs::{self, File};
 use std::io::{self, prelude::*, BufReader};
-use std::{ffi::CStr, io::BufRead};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -37,7 +34,6 @@ fn main() -> anyhow::Result<()> {
         Command::CatFile { object_hash, .. } => {
             let path = format!(".git/objects/{}/{}", &object_hash[..2], &object_hash[2..]);
             let f = File::open(path)?;
-            // Removed 'mut' from the 'z' variable
             let z = ZlibDecoder::new(f);
             let mut z = BufReader::new(z);
 
@@ -59,7 +55,7 @@ fn main() -> anyhow::Result<()> {
 
             let stdout = io::stdout();
             let mut stdout = stdout.lock();
-            stdout.write_all(&buf)?;
+            stdout.write(&buf)?;
         }
     }
 
