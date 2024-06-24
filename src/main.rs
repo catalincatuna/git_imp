@@ -32,10 +32,10 @@ enum Command {
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-    println!("Logs from your program will appear here!");
+    //println!("Logs from your program will appear here!");
 
     let args = Args::parse();
-    println!("Args: {:?}", args);
+    //println!("Args: {:?}", args);
 
     match args.command {
         Command::Init => {
@@ -65,17 +65,6 @@ fn main() {
             let header = CStr::from_bytes_with_nul(&buf).expect("one null at the end");
 
             let header = header.to_str().unwrap();
-            // match header.strip_prefix("blob ") {
-            //     Some(s) => {
-            //         // Do something with the size
-            //         size = Some(s);
-            //         println!("Blob size: {}", size);
-            //     }
-            //     None => {
-            //         // Handle the case where the prefix "blob " is not present
-            //         println!("The header does not start with 'blob '.");
-            //     }
-            // };
 
             let mut size: usize = 0;
 
