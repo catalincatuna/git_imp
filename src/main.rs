@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
-use std::env;
 use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
