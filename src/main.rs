@@ -1,10 +1,6 @@
-use anyhow::Context;
-#[allow(unused_imports)]
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
-#[allow(unused_imports)]
 use std::env;
-#[allow(unused_imports)]
 use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -39,9 +35,9 @@ fn main() -> Result<(), anyhow::Error> {
             fs::write(".git/HEAD", "ref: refs/heads/main\n")?;
         }
         Command::CatFile { object_hash, .. } => {
-            let f = std::fs::File::open(format!(".git/objects/{}/{}", &object_hash[..2], &object_hash[2..]))?;
+            let f = fs::File::open(format!(".git/objects/{}/{}", &object_hash[..2], &object_hash[2..]))?;
 
-            let mut z = ZlibDecoder::new(f);
+            let z = ZlibDecoder::new(f);
             let mut z = BufReader::new(z);
 
             let mut buf = Vec::new();
@@ -55,6 +51,7 @@ fn main() -> Result<(), anyhow::Error> {
                 z.read_exact(&mut buf)?;
                 
                 io::stdout().write_all(&buf)?;
+                io::stdout().flush()?; // Make sure all output is written to stdout
             } else {
                 return Err(anyhow::anyhow!("The header does not start with 'blob '."));
             }
