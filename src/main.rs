@@ -69,11 +69,11 @@ fn main() {
             let mut size: usize = 0;
 
             if let Some(s) = header.strip_prefix("blob ") {
-                println!("Blob size: {:?}", s);
+                // println!("Blob size: {:?}", s);
                 size = s.parse::<usize>().unwrap();
-                println!("Blob size: {}", size);
+                // println!("Blob size: {}", size);
             } else {
-                println!("The header does not start with 'blob '.");
+                // println!("The header does not start with 'blob '.");
             }
 
             buf.clear();
