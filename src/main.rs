@@ -3,7 +3,6 @@ use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
 use std::fs;
 use std::io::{Read, Write};
-use std::{ffi::CStr, io::BufReader};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -39,26 +38,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } => {
             let file_path = format!(".git/objects/{}/{}", &object_hash[..2], &object_hash[2..]);
             let f = fs::File::open(file_path)?;
-            let mut z = ZlibDecoder::new(BufReader::new(f));
+            let mut z = ZlibDecoder::new(f);
 
-            let mut buf = Vec::new();
-            z.read_until(0, &mut buf).context("read header from .git/objects")?;
-            let header = CStr::from_bytes_with_nul(&buf)?.to_str()?;
+            let mut header_buf = Vec::new();
+            z.read_until(0, &mut header_buf).context("read header from .git/objects")?;
+            // Remove the null byte and parse the header
+            let header_str = String::from_utf8(header_buf).context("invalid UTF-8 sequence")?;
+            let header_parts: Vec<&str> = header_str.splitn(2, '\0').collect();
+            if header_parts.len() != 2 || !header_parts[0].starts_with("blob ") {
+                return Err("invalid blob object".into());
+            }
 
-            let size = if let Some(s) = header.strip_prefix("blob ") {
-                s.parse::<usize>().context("invalid blob size")?
-            } else {
-                return Err("The header does not start with 'blob '".into());
-            };
-
-            buf.clear();
-            buf.resize(size, 0);
-            z.read_exact(&mut buf[..]).context("read blob")?;
+            let content_buf = header_parts[1].as_bytes();
 
             let stdout = std::io::stdout();
             let mut stdout = stdout.lock();
 
-            stdout.write_all(&buf)?;
+            stdout.write_all(content_buf)?;
         }
     };
 
