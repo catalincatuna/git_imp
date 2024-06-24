@@ -2,7 +2,7 @@ use anyhow::Context;
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
 use std::fs;
-use std::io::{Read, Write};
+use std::io::{self, Write};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -37,24 +37,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             object_hash,
         } => {
             let file_path = format!(".git/objects/{}/{}", &object_hash[..2], &object_hash[2..]);
-            let f = fs::File::open(file_path)?;
+            let f = fs::File::open(&file_path).context("Could not open object file")?;
             let mut z = ZlibDecoder::new(f);
+            
+            let mut decompressed_data = Vec::new();
+            z.read_to_end(&mut decompressed_data).context("Failed to read zlib decompressed data")?;
 
-            let mut header_buf = Vec::new();
-            z.read_until(0, &mut header_buf).context("read header from .git/objects")?;
-            // Remove the null byte and parse the header
-            let header_str = String::from_utf8(header_buf).context("invalid UTF-8 sequence")?;
-            let header_parts: Vec<&str> = header_str.splitn(2, '\0').collect();
-            if header_parts.len() != 2 || !header_parts[0].starts_with("blob ") {
-                return Err("invalid blob object".into());
-            }
+            let mut split = decompressed_data.splitn(2, |b| *b == 0);
+            let header = split.next().ok_or("Invalid blob object: Missing header")?;
+            let content = split.next().ok_or("Invalid blob object: Missing content")?;
 
-            let content_buf = header_parts[1].as_bytes();
+            // Header is skipped, not needed unless we want to validate size or type of object
 
-            let stdout = std::io::stdout();
+            let stdout = io::stdout();
             let mut stdout = stdout.lock();
 
-            stdout.write_all(content_buf)?;
+            stdout.write_all(content)?;
         }
     };
 
