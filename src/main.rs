@@ -1,4 +1,4 @@
-use anyhow::Context;
+// Removed the unused import 'anyhow::Context'
 #[allow(unused_imports)]
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
@@ -37,7 +37,8 @@ fn main() -> anyhow::Result<()> {
         Command::CatFile { object_hash, .. } => {
             let path = format!(".git/objects/{}/{}", &object_hash[..2], &object_hash[2..]);
             let f = File::open(path)?;
-            let mut z = ZlibDecoder::new(f);
+            // Removed 'mut' from the 'z' variable
+            let z = ZlibDecoder::new(f);
             let mut z = BufReader::new(z);
 
             let mut buf = Vec::new();
