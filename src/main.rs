@@ -55,7 +55,7 @@ fn main() {
                 &object_hash[2..]
             ))
             .unwrap();
-            //comment
+
             let mut z = ZlibDecoder::new(f);
             let mut z = BufReader::new(z);
 
