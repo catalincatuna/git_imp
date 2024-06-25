@@ -102,7 +102,7 @@ fn main() -> anyhow::Result<()> {
             write_object,
             object_file,
         } => {
-            let file_path = PathBuf::from(format!("tmp/testing/{}", object_file));
+            let file_path = PathBuf::from(format!("{}", object_file));
 
             let contents = std::fs::read_to_string(&file_path).unwrap();
 
