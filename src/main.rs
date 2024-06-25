@@ -1,14 +1,18 @@
+use anyhow::anyhow;
 use anyhow::Context;
 #[allow(unused_imports)]
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
-use flate2::Compression;
+use flate2::write::ZlibEncoder;
+use hex::ToHex;
+use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
 #[allow(unused_imports)]
 use std::fs;
 use std::io::prelude::*;
 use std::io::Stdout;
+use std::path::PathBuf;
 use std::{ffi::CStr, io::BufReader};
 
 #[derive(Parser, Debug)]
@@ -28,9 +32,15 @@ enum Command {
 
         object_hash: String,
     },
+    HashObject {
+        #[clap(short = 'w')]
+        write_object: bool,
+
+        object_file: String,
+    },
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     //println!("Logs from your program will appear here!");
 
@@ -49,19 +59,19 @@ fn main() {
             pretty_print,
             object_hash,
         } => {
-            let mut f = std::fs::File::open(format!(
+            let f = std::fs::File::open(format!(
                 ".git/objects/{}/{}",
                 &object_hash[..2],
                 &object_hash[2..]
             ))
             .unwrap();
 
-            let mut z = ZlibDecoder::new(f);
+            let z = ZlibDecoder::new(f);
             let mut z = BufReader::new(z);
 
             let mut buf = Vec::new();
             z.read_until(0, &mut buf)
-                .context("read header from .git/objects");
+                .context("read header from .git/objects")?;
             let header = CStr::from_bytes_with_nul(&buf).expect("one null at the end");
 
             let header = header.to_str().unwrap();
@@ -79,49 +89,58 @@ fn main() {
             buf.clear();
             buf.resize(size, 0);
 
-            z.read_exact(&mut buf[..]).context("read blob");
+            z.read_exact(&mut buf[..]).context("read blob")?;
 
             let stdout = std::io::stdout();
 
             let mut stdout = stdout.lock();
 
-            stdout.write_all(&buf).context("write all to stdout");
+            stdout.write_all(&buf).context("write all to stdout")?;
+        }
 
-            // let stdout = std::io::stdout();
-            // let mut stdout = stdout.lock();
-            // stdout.write_all(&f).context("write all to stdout")?;
+        Command::HashObject {
+            write_object,
+            object_file,
+        } => {
+            let file_path = PathBuf::from(format!("tmp/testing/{}", object_file));
 
-            // let mut z = BufReader::new(z);
-            // let mut buf = Vec::new();
+            let contents = std::fs::read_to_string(&file_path).unwrap();
 
-            // z.read_until(0, &mut buf).context("read header from .git/objects");
-            // let header = CStr::from_bytes_with_nul(&buf).expect("one null at the end");
+            let blob = format!("blob {}\0{}", contents.len(), contents);
 
-            // let header = header.to_str().context("not valid UTF-8");
+            //println!("{:?}", blob);
 
-            // let Some(size) = header.strip_prefix(("blob")) else {
-            //     anyhow::bail!("not a blob");
-            // };
+            let mut hasher = Sha1::new();
+            hasher.update(blob.as_bytes());
 
-            // let size = size.parse::<usize>().context(".git/objects not a blob")?;
-            // buf.clear();
+            let object_hash = hasher.finalize();
 
-            // buf.resize(size, 0);
+            let hex_result = hex::encode(object_hash);
 
-            // z.read_exact(&mut buf[..]).context("read blob")?;
+            println!("{:?}", hex_result);
 
-            // let n = z.read(&mut [0]).context("validate EOF")?;
+            let path = format!(".git/objects/{}", &hex_result[..2]);
 
-            // anyhow::ensure!(n == 0, "invalid EOF, n has trailing bytes");
+            let file_path = format!("{}/{}", path, &hex_result[2..]);
 
-            // let stdout = std::io::stdout();
+            let file_content = &hex_result[2..];
 
-            // let mut stdout = stdout.lock();
+            //println!("{:?}", path);
 
-            // stdout.write_all(&buf).context("write all to stdout")?;
+            if !fs::metadata(&path).is_ok() {
+                // Create the directory if it doesn't exist
+                fs::create_dir(&path)?;
+            } else {
+                // do nothing
+            }
+            //fs::create_dir(format!(".git/objects")).unwrap();
+
+            fs::write(&file_path, &file_content).unwrap();
         }
         _ => {
-            println!("unknown command: {:?}", args.command)
+            println!("unknown command: {:?}", args.command);
         }
     };
+
+    Ok(())
 }
