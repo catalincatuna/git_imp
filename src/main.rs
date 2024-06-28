@@ -4,6 +4,7 @@ use anyhow::Context;
 use clap::{Parser, Subcommand};
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
+use flate2::Compression;
 use hex::ToHex;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
@@ -125,6 +126,16 @@ fn main() -> anyhow::Result<()> {
 
             let file_content = &hex_result[2..];
 
+            let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+
+            e.write_all(&blob.as_bytes())?;
+
+            let compressed = e.finish()?;
+
+            // dbg!(compressed);
+
+            let file_content = &hex_result[2..];
+
             //println!("{:?}", path);
 
             if !fs::metadata(&path).is_ok() {
@@ -135,7 +146,7 @@ fn main() -> anyhow::Result<()> {
             }
             //fs::create_dir(format!(".git/objects")).unwrap();
 
-            fs::write(&file_path, &file_content).unwrap();
+            fs::write(&file_path, &compressed).unwrap();
         }
         _ => {
             println!("unknown command: {:?}", args.command);
