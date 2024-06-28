@@ -117,7 +117,7 @@ fn main() -> anyhow::Result<()> {
 
             let hex_result = hex::encode(object_hash);
 
-            println!("{:?}", hex_result.as_str());
+            println!("{:?}", hex_result);
 
             let path = format!(".git/objects/{}", &hex_result[..2]);
 
