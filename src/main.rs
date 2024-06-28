@@ -104,7 +104,7 @@ fn main() -> anyhow::Result<()> {
         } => {
             let file_path = PathBuf::from(format!("{}", object_file));
 
-            let contents = std::fs::read_to_string(&file_path).unwrap();
+            let contents = std::fs::read_to_string(&file_path)?;
 
             let blob = format!("blob {}\0{}", contents.len(), contents);
 
@@ -117,7 +117,7 @@ fn main() -> anyhow::Result<()> {
 
             let hex_result = hex::encode(object_hash);
 
-            println!("{:?}", hex_result);
+            println!("{}", hex_result);
 
             let path = format!(".git/objects/{}", &hex_result[..2]);
 
