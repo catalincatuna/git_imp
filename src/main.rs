@@ -6,6 +6,7 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use hex::ToHex;
+use reqwest::header;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
@@ -39,14 +40,32 @@ enum Command {
 
         object_file: String,
     },
+    LsTree {
+        #[clap(long)]
+        name_only: bool,
+
+        tree_sha: String,
+    },
+}
+
+fn extract_filenames(input: &str) -> Vec<String> {
+    input
+        .lines()
+        .filter_map(|line| {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            parts
+                .get(1)
+                .map(|s| s.split('_').next().unwrap().to_string())
+        })
+        .collect()
 }
 
 fn main() -> anyhow::Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-    //println!("Logs from your program will appear here!");
+    // println!("Logs from your program will appear hrrr!");
 
     let args = Args::parse();
-    //println!("Args: {:?}", args);
+    // println!("Args: {:?}", args);
 
     match args.command {
         Command::Init => {
@@ -147,6 +166,60 @@ fn main() -> anyhow::Result<()> {
             //fs::create_dir(format!(".git/objects")).unwrap();
 
             fs::write(&file_path, &compressed).unwrap();
+        }
+
+        Command::LsTree {
+            name_only,
+            tree_sha,
+        } => {
+            let path = format!("../../.git/objects/{}/{}", &tree_sha[..2], &tree_sha[2..]);
+
+            // println!("{}", path);
+            let f = std::fs::File::open(path).unwrap();
+
+            let z = ZlibDecoder::new(f);
+
+            let mut z = BufReader::new(z);
+
+            let mut buf = Vec::new();
+
+            z.read_until(0, &mut buf)
+                .context("read header from .git/objects");
+
+            let header = CStr::from_bytes_with_nul(&buf).unwrap();
+
+            let mut header = header.to_str().unwrap();
+
+            let mut size: usize = 0;
+
+            if let Some(s) = header.strip_prefix("tree ") {
+                size = s.parse::<usize>().unwrap();
+            } else {
+                println!("not a tree");
+            }
+
+            buf.clear();
+
+            buf.resize(size, 0);
+
+            z.read_exact(&mut buf[..]).context("read tree")?;
+
+            // //println!("{:?}", buf);
+            let string_data = String::from_utf8_lossy(&buf);
+
+            let file_names = extract_filenames(&string_data);
+
+            for filename in file_names {
+                println!("{}", filename);
+            }
+
+            // let stdout = std::io::stdout();
+
+            // let mut stdout = stdout.lock();
+
+            // stdout
+            //     .write_all(&file_names)
+            //     .context("write all to stdout")?;
         }
         _ => {
             println!("unknown command: {:?}", args.command);
