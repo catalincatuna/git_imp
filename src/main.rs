@@ -204,7 +204,6 @@ fn main() -> anyhow::Result<()> {
 
             z.read_exact(&mut buf[..]).context("read tree")?;
 
-            // //println!("{:?}", buf);
             let string_data = String::from_utf8_lossy(&buf);
 
             let file_names = extract_filenames(&string_data);
