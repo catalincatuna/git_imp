@@ -65,7 +65,7 @@ fn main() -> anyhow::Result<()> {
     // println!("Logs from your program will appear hrrr!");
 
     let args = Args::parse();
-    // println!("Args: {:?}", args);
+    println!("Args: {:?}", args);
 
     match args.command {
         Command::Init => {
