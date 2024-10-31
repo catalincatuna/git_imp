@@ -65,7 +65,7 @@ fn main() -> anyhow::Result<()> {
     // println!("Logs from your program will appear hrrr!");
 
     let args = Args::parse();
-    println!("Args: {:?}", args);
+    //println!("Args: {:?}", args);
 
     match args.command {
         Command::Init => {
@@ -172,9 +172,9 @@ fn main() -> anyhow::Result<()> {
             name_only,
             tree_sha,
         } => {
-            let path = format!(".git/objects/{}/{}", &tree_sha[..2], &tree_sha[2..]);
+            let path = format!("../.git/objects/{}/{}", &tree_sha[..2], &tree_sha[2..]);
 
-            // println!("{}", path);
+            println!("{}", path);
             let f = std::fs::File::open(path).unwrap();
 
             let z = ZlibDecoder::new(f);
@@ -208,19 +208,20 @@ fn main() -> anyhow::Result<()> {
 
             let file_names = extract_filenames(&string_data);
 
-            for filename in file_names {
-                println!("{}", filename);
-            }
+            // for filename in file_names {
+            //     println!("{}", filename);
+            // }
 
             
 
-            // let stdout = std::io::stdout();
+            let stdout = std::io::stdout();
 
-            // let mut stdout = stdout.lock();
+            let mut stdout = stdout.lock();
 
-            // stdout
-            //     .write_all(&file_names)
-            //     .context("write all to stdout")?;
+            for f in file_names {
+                stdout.write_all(f.as_bytes())
+                .context("write all to stdout")?;
+            }
         }
         _ => {
             println!("unknown command: {:?}", args.command);
