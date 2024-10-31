@@ -174,7 +174,7 @@ fn main() -> anyhow::Result<()> {
         } => {
             let path = format!(".git/objects/{}/{}", &tree_sha[..2], &tree_sha[2..]);
 
-            println!("{}", path);
+            //println!("{}", path);
             let f = std::fs::File::open(path).unwrap();
 
             let z = ZlibDecoder::new(f);
@@ -204,7 +204,10 @@ fn main() -> anyhow::Result<()> {
 
             z.read_exact(&mut buf[..]).context("read tree")?;
 
-            let string_data = String::from_utf8_lossy(&buf);
+            unsafe {
+
+            let string_data = String::from_utf8_unchecked(buf);
+            
 
             let file_names = extract_filenames(&string_data);
 
@@ -222,6 +225,7 @@ fn main() -> anyhow::Result<()> {
                 stdout.write_all(f.as_bytes())
                 .context("write all to stdout")?;
             }
+        }
         }
         _ => {
             println!("unknown command: {:?}", args.command);
