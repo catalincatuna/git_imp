@@ -204,10 +204,7 @@ fn main() -> anyhow::Result<()> {
 
             z.read_exact(&mut buf[..]).context("read tree")?;
 
-            unsafe {
-
-            let string_data = String::from_utf8_unchecked(buf);
-            
+            let string_data = String::from_utf8(buf).unwrap();
 
             let file_names = extract_filenames(&string_data);
 
@@ -225,7 +222,6 @@ fn main() -> anyhow::Result<()> {
                 stdout.write_all(f.as_bytes())
                 .context("write all to stdout")?;
             }
-        }
         }
         _ => {
             println!("unknown command: {:?}", args.command);
