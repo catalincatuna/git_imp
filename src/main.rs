@@ -172,7 +172,7 @@ fn main() -> anyhow::Result<()> {
             name_only,
             tree_sha,
         } => {
-            let path = format!("../../.git/objects/{}/{}", &tree_sha[..2], &tree_sha[2..]);
+            let path = format!(".git/objects/{}/{}", &tree_sha[..2], &tree_sha[2..]);
 
             // println!("{}", path);
             let f = std::fs::File::open(path).unwrap();
