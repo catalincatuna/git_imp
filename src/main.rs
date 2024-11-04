@@ -184,7 +184,7 @@ fn main() -> anyhow::Result<()> {
             let mut buf = Vec::new();
 
             z.read_until(0, &mut buf)
-                .context("read header from .git/objects");
+                .context("read header from .git/objects"); 
 
             let header = CStr::from_bytes_with_nul(&buf).unwrap();
 
@@ -204,7 +204,7 @@ fn main() -> anyhow::Result<()> {
 
             z.read_exact(&mut buf[..]).context("read tree")?;
 
-            let string_data = String::from_utf8(buf).unwrap();
+            let string_data = String::from_utf8_lossy(&buf);
 
             let file_names = extract_filenames(&string_data);
 
