@@ -60,7 +60,7 @@ fn extract_filenames(input: &str) -> Vec<String> {
         .collect()
 }
 
-unsafe fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear hrrr!");
 
@@ -206,23 +206,26 @@ unsafe fn main() -> anyhow::Result<()> {
 
             println!("{:?}", buf);
 
-            let string_data = String::from_utf8_unchecked(buf);
+            unsafe {
 
-            let file_names = extract_filenames(&string_data);
-
-            // for filename in file_names {
-            //     println!("{}", filename);
-            // }
-
-            
-
-            let stdout = std::io::stdout();
-
-            let mut stdout = stdout.lock();
-
-            for f in file_names {
-                stdout.write_all(f.as_bytes())
-                .context("write all to stdout")?;
+                let string_data = String::from_utf8_unchecked(buf);
+                
+                let file_names = extract_filenames(&string_data);
+                
+                // for filename in file_names {
+                    //     println!("{}", filename);
+                    // }
+                    
+                    
+                    
+                    let stdout = std::io::stdout();
+                    
+                    let mut stdout = stdout.lock();
+                    
+                    for f in file_names {
+                        stdout.write_all(f.as_bytes())
+                        .context("write all to stdout")?;
+                }
             }
         }
         _ => {
