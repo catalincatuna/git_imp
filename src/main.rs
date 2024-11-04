@@ -211,7 +211,7 @@ fn main() -> anyhow::Result<()> {
                 //     Ok(valid_data) => valid_data,
                 //     Err(_) => String::from_utf8_lossy(&buf.clo).into_owned()
                 // };
-                let string_data = String::from_utf8(buf).unwrap_or_default();
+                let string_data = String::from_utf8_lossy(&buf);
 
 
                 
