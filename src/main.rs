@@ -225,8 +225,8 @@ fn main() -> anyhow::Result<()> {
                     for f in file_names {
                         stdout.write_all(f.as_bytes())
                         .context("write all to stdout")?;
-                }
-            }
+                };
+            };
         }
         _ => {
             println!("unknown command: {:?}", args.command);
