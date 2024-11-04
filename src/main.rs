@@ -60,7 +60,7 @@ fn extract_filenames(input: &str) -> Vec<String> {
         .collect()
 }
 
-fn main() -> anyhow::Result<()> {
+unsafe fn main() -> anyhow::Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear hrrr!");
 
@@ -204,7 +204,9 @@ fn main() -> anyhow::Result<()> {
 
             z.read_exact(&mut buf[..]).context("read tree")?;
 
-            let string_data = String::from_utf8_lossy(&buf);
+            println!("{:?}", buf);
+
+            let string_data = String::from_utf8_unchecked(buf);
 
             let file_names = extract_filenames(&string_data);
 
