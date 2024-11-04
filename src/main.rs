@@ -204,9 +204,9 @@ fn main() -> anyhow::Result<()> {
 
             z.read_exact(&mut buf[..]).context("read tree")?;
 
-            println!("{:?}", buf);
+           // println!("{:?}", buf);
 
-                let string_data = String::from_utf8(buf).ok().unwrap();
+                let string_data = String::from_utf8(buf).ok();
                 // let string_data = match String::from_utf8(buf) {
                 //     Ok(valid_data) => valid_data,
                 //     Err(_) => String::from_utf8_lossy(&buf.clo).into_owned()
@@ -214,7 +214,7 @@ fn main() -> anyhow::Result<()> {
                 
 
                 
-                let file_names = extract_filenames(&string_data);
+                let file_names = extract_filenames(&string_data.unwrap());
                 
                 // for filename in file_names {
                     //     println!("{}", filename);
