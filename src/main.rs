@@ -206,9 +206,11 @@ fn main() -> anyhow::Result<()> {
 
             println!("{:?}", buf);
 
-            unsafe {
-
-                let string_data = String::from_utf8_unchecked(buf);
+                //let string_data = String::from_utf8(buf)?;
+                let string_data = match String::from_utf8(buf) {
+                    Ok(valid_data) => valid_data,
+                    Err(e) => String::from_utf8_lossy(e.as_bytes()).into_owned()
+                };
                 
                 let file_names = extract_filenames(&string_data);
                 
@@ -225,8 +227,8 @@ fn main() -> anyhow::Result<()> {
                     for f in file_names {
                         stdout.write_all(f.as_bytes())
                         .context("write all to stdout")?;
-                };
-            };
+                }
+            
         }
         _ => {
             println!("unknown command: {:?}", args.command);
