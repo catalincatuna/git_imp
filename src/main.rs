@@ -206,11 +206,13 @@ fn main() -> anyhow::Result<()> {
 
             println!("{:?}", buf);
 
-                //let string_data = String::from_utf8(buf)?;
-                let string_data = match String::from_utf8(buf) {
-                    Ok(valid_data) => valid_data,
-                    Err(e) => String::from_utf8_lossy(e.as_bytes()).into_owned()
-                };
+                let string_data = String::from_utf8(buf).ok().unwrap();
+                // let string_data = match String::from_utf8(buf) {
+                //     Ok(valid_data) => valid_data,
+                //     Err(_) => String::from_utf8_lossy(&buf.clo).into_owned()
+                // };
+                
+
                 
                 let file_names = extract_filenames(&string_data);
                 
