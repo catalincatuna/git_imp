@@ -183,8 +183,17 @@ fn main() -> anyhow::Result<()> {
 
             let mut buf = Vec::new();
 
+            let mut buf_copy = buf.clone();
+
             z.read_until(0, &mut buf)
                 .context("read header from .git/objects"); 
+
+            let full_buf = String::from_utf8(buf_copy).unwrap();
+
+            println!("{:?}", full_buf);
+            // let mut stdout_debug = std::io::stdout();
+            
+            // stdout_debug.write(&full_buf);
 
             let header = CStr::from_bytes_with_nul(&buf).unwrap();
 
