@@ -195,51 +195,51 @@ fn main() -> anyhow::Result<()> {
             
             // stdout_debug.write(&full_buf);
 
-            let header = CStr::from_bytes_with_nul(&buf).unwrap();
+            // let header = CStr::from_bytes_with_nul(&buf).unwrap();
 
-            let mut header = header.to_str().unwrap();
+            // let mut header = header.to_str().unwrap();
 
-            let mut size: usize = 0;
+            // let mut size: usize = 0;
 
-            if let Some(s) = header.strip_prefix("tree ") {
-                size = s.parse::<usize>().unwrap();
-            } else {
-                println!("not a tree");
-            }
+            // if let Some(s) = header.strip_prefix("tree ") {
+            //     size = s.parse::<usize>().unwrap();
+            // } else {
+            //     println!("not a tree");
+            // }
 
-            buf.clear();
+            // buf.clear();
 
-            buf.resize(size, 0);
+            // buf.resize(size, 0);
 
-            z.read_exact(&mut buf[..]).context("read tree")?;
+            // z.read_exact(&mut buf[..]).context("read tree")?;
 
-            //println!("{:?}", buf);
+            // //println!("{:?}", buf);
 
-                //let string_data = String::from_utf8(buf).ok();
-                // let string_data = match String::from_utf8(buf) {
-                //     Ok(valid_data) => valid_data,
-                //     Err(_) => String::from_utf8_lossy(&buf.clo).into_owned()
-                // };
-                let string_data = String::from_utf8_lossy(&buf);
+            //     //let string_data = String::from_utf8(buf).ok();
+            //     // let string_data = match String::from_utf8(buf) {
+            //     //     Ok(valid_data) => valid_data,
+            //     //     Err(_) => String::from_utf8_lossy(&buf.clo).into_owned()
+            //     // };
+            //     let string_data = String::from_utf8_lossy(&buf);
 
 
                 
-                let file_names = extract_filenames(&string_data);
+            //     let file_names = extract_filenames(&string_data);
                 
-                // for filename in file_names {
-                    //     println!("{}", filename);
-                    // }
+            //     // for filename in file_names {
+            //         //     println!("{}", filename);
+            //         // }
                     
                     
                     
-                    let stdout = std::io::stdout();
+            //         let stdout = std::io::stdout();
                     
-                    let mut stdout = stdout.lock();
+            //         let mut stdout = stdout.lock();
                     
-                    for f in file_names {
-                        stdout.write_all(f.as_bytes())
-                        .context("write all to stdout")?;
-                }
+            //         for f in file_names {
+            //             stdout.write_all(f.as_bytes())
+            //             .context("write all to stdout")?;
+            //     }
             
         }
         _ => {
