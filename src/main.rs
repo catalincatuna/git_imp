@@ -48,17 +48,47 @@ enum Command {
     },
 }
 
+fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
+    let mut results = Vec::new();
+    let mut start_index = 0;
+
+    while let Some(pos) = patterns
+        .iter()
+        .filter_map(|pattern| input[start_index..].find(pattern).map(|i| (i, *pattern)))
+        .min_by_key(|(i, _)| *i) // Find the closest match
+    {
+        let pattern_pos = start_index + pos.0;
+        let pattern = pos.1;
+        start_index = pattern_pos + pattern.len();
+
+        let next_part = input[start_index+1..]
+            .chars()
+            .take_while(|&c| c != '\0')
+            .collect::<String>();
+        if !next_part.is_empty() {
+            results.push(next_part);
+        }
+    }
+
+    results
+}
+
 fn extract_filenames(input: &str) -> Vec<String> {
     input
         .lines()
-        .filter_map(|line| {
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            parts
-                .get(1)
-                .map(|s| s.split('_').next().unwrap().to_string())
-        })
-        .collect()
+        .map(|l| l.split_whitespace().collect()).collect()
 }
+// fn extract_filenames(input: &str) -> Vec<String> {
+//     input
+//         .lines()
+//         .filter_map(|line| {
+//             let parts: Vec<&str> = line.split_whitespace().collect();
+//             parts
+//                 .get(1)
+//                 .map(|s| s.split('_').next().unwrap().to_string())
+//         })
+//         .collect()
+// }
 
 fn main() -> anyhow::Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -188,58 +218,61 @@ fn main() -> anyhow::Result<()> {
             z.read_until(0, &mut buf)
                 .context("read header from .git/objects"); 
 
-            let full_buf = String::from_utf8(buf_copy).unwrap();
+            // z.read_until(0, &mut buf_copy)
+            //     .context("read header from .git/objects"); 
 
-            println!("{:?}", full_buf);
-            // let mut stdout_debug = std::io::stdout();
+            // let full_buf = String::from_utf8(buf_copy).unwrap();
             
-            // stdout_debug.write(&full_buf);
+            let header = CStr::from_bytes_with_nul(&buf).unwrap();
 
-            // let header = CStr::from_bytes_with_nul(&buf).unwrap();
+            let mut header = header.to_str().unwrap();
 
-            // let mut header = header.to_str().unwrap();
+            let mut size: usize = 0;
 
-            // let mut size: usize = 0;
+            if let Some(s) = header.strip_prefix("tree ") {
+                size = s.parse::<usize>().unwrap();
+            } else {
+                println!("not a tree");
+            }
 
-            // if let Some(s) = header.strip_prefix("tree ") {
-            //     size = s.parse::<usize>().unwrap();
-            // } else {
-            //     println!("not a tree");
-            // }
+            buf.clear();
 
-            // buf.clear();
+            buf.resize(size, 0);
 
-            // buf.resize(size, 0);
+            z.read_to_end(&mut buf).context("read tree")?;
 
-            // z.read_exact(&mut buf[..]).context("read tree")?;
+            //println!("{:?}", buf);
 
-            // //println!("{:?}", buf);
+                // let string_data = match String::from_utf8(buf) {
+                //     Ok(valid_data) => valid_data,
+                //     Err(_) => "/".to_string()//String::from_utf8_lossy(&buf.clo).into_owned()
+                // };
+                //let string_data = String::from_utf8_lossy(&buf).into_owned();
 
-            //     //let string_data = String::from_utf8(buf).ok();
-            //     // let string_data = match String::from_utf8(buf) {
-            //     //     Ok(valid_data) => valid_data,
-            //     //     Err(_) => String::from_utf8_lossy(&buf.clo).into_owned()
-            //     // };
-            //     let string_data = String::from_utf8_lossy(&buf);
-
-
+                let string_data = String::from_utf8_lossy(&buf)
+                                 .chars()
+                                 .map(|c| {if c.is_ascii() || c.is_alphanumeric() {c} else {'/'}})
+                                 .collect::<String>();
                 
-            //     let file_names = extract_filenames(&string_data);
-                
-            //     // for filename in file_names {
-            //         //     println!("{}", filename);
-            //         // }
+
+                let input = String::from("100644gitattributes/jERrgkk100644gitignore/sr┼¡qda");
+
+                let patterns = &["100644", "0100755", "40000"];
+
+                let extracted = extract_after_numeric(string_data, patterns);
                     
                     
+                    let stdout = std::io::stdout();
                     
-            //         let stdout = std::io::stdout();
+                    let mut stdout = stdout.lock();
                     
-            //         let mut stdout = stdout.lock();
-                    
-            //         for f in file_names {
-            //             stdout.write_all(f.as_bytes())
-            //             .context("write all to stdout")?;
-            //     }
+                    for f in extracted {
+                        stdout.write_all(f.as_bytes())
+                        .context("write all to stdout")?;
+                    stdout
+                    .write_all(b"\n")
+                    .context("write newline to stdout")?;
+                }
             
         }
         _ => {

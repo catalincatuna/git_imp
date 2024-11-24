@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "attach",
+            "name": "Attach to rust program",
+            "sourceLanguages": ["rust"],
+            "pid": "${command:pickMyProcess}" // use ${command:pickProcess} to pick other users' processes
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'git-starter-rust'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=git-starter-rust",
+                    "--package=git-starter-rust"
+                ],
+                "filter": {
+                    "name": "git-starter-rust",
+                    "kind": "bin"
+                }
+            },
+            "args": ["ls-tree", "8a3b19a4e3eb2e527bc84c702d81d781657683df"],
+            "cwd": "${workspaceFolder}/test_dir2"   
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'git-starter-rust'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=git-starter-rust",
+                    "--package=git-starter-rust"
+                ],
+                "filter": {
+                    "name": "git-starter-rust",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
