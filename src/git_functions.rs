@@ -211,6 +211,8 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
             //     };
             // }
 
+            // println!("{:?}", current_dir);
+
             for entry in fs::read_dir(current_dir).unwrap() {
                 match entry {
 
@@ -218,7 +220,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
 
                         let metadata = fs::metadata(entry.path()).unwrap();
 
-                        let filename = utils::extract_filename(entry.path().to_string_lossy().to_string());
+                        let filename = entry.file_name().into_string().unwrap();
                         
                         if(metadata.is_file()) {
 
@@ -228,7 +230,6 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
 
                         }
                         else if (metadata.is_dir()) {
-                            
                             
                             entries.push(utils::process_directory(&entry.path()).unwrap());
                         }

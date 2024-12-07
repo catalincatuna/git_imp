@@ -32,11 +32,14 @@ pub fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
 }
 // Function to compute the hash of a file
 pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
-    let content = fs::read_to_string(path).unwrap();
+
+    let content = fs::read(path)?; // Read raw bytes
+    let string_content = String::from_utf8_lossy(&content).to_string(); // Convert to String, replacing invalid bytes
+
     
     let mut hasher = Sha1::new();
 
-    let hash_input = format!("100644 {}", content);
+    let hash_input = format!("100644 {}", string_content);
 
     hasher.update(hash_input.as_bytes());
 
@@ -45,7 +48,7 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
     let encoded = encode(object_hash.as_slice());
 
     let encoded_string = encoded.to_string();
-    
+
     Ok(encoded_string)
 }
 
@@ -59,7 +62,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<String>  {
 
         if metadata.is_dir() {
             // If it's a directory, process it recursively
-            input.push(process_directory(&path).unwrap());
+            input.push(process_directory(&path)?);
         } else if metadata.is_file() {
             // If it's a file, add its hash to the input for the final hash
             input.push(format!("100644 {} {}",entry.file_name().into_string().unwrap(), compute_file_hash(&path).unwrap()));
