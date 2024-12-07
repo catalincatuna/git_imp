@@ -43,8 +43,10 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
 
     let hex_result = hex::encode(object_hash);
 
+    let byte_str = String::from_utf8(hex::decode(&hex_result).unwrap());
+    
     // Return the hash as a hexadecimal string
-    Ok(hex_result)
+    Ok(byte_str.unwrap())
 }
 
 // Function to process a directory
@@ -72,7 +74,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<String>  {
 
     let hex_result = hex::encode(object_hash);
 
-    let dir_out = format!("040000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), hex_result);
+    let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), hex_result);
 
     Ok(dir_out)
 }
