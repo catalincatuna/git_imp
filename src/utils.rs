@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use sha1::{Digest, Sha1};
 use base64;
-
+use ascii85::encode;
 
 
 pub fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
@@ -42,10 +42,11 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
 
     let object_hash = hasher.finalize();
 
-    let base64_result = base64::encode(object_hash);
+    let encoded = encode(object_hash.as_slice());
+
+    let encoded_string = encoded.to_string();
     
-    // Return the hash as a hexadecimal string
-    Ok(base64_result)
+    Ok(encoded_string)
 }
 
 // Function to process a directory

@@ -15,6 +15,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c91f1f46651137be86f3a2b9a8359f9ab421d04d941c62b5982e1ca21113adf9"
 
 [[package]]
+name = "ascii85"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f7b2cc50ccfca05cc3e99a014901ae232948108082a2eecebc3ab6544ebd938"
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -305,6 +311,7 @@ name = "git-starter-rust"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "ascii85",
  "base64 0.22.1",
  "bytes",
  "clap",
