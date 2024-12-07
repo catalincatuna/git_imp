@@ -189,11 +189,10 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
         }
         Command::WriteTree => {
 
-            let mut current_dir = std::env::current_dir()?;
+            let current_dir = std::env::current_dir()?;
             
             //let parent_dir = current_dir.parent().unwrap();
             
-            println!("current directory is {:?}", current_dir);
             let mut entries = vec![];
 
 
@@ -251,7 +250,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
 
             let tree = format!("tree {}\0{}", entries.concat().len(), entries.concat());
 
-            println!("{:?}", tree);
+            //println!("{:?}", tree);
             let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
             
             e.write_all(&tree.as_bytes())?;
