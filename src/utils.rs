@@ -75,9 +75,11 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<String>  {
 
     let object_hash = hasher.finalize();
 
-    let hex_result = hex::encode(object_hash);
+    let encoded = encode(object_hash.as_slice());
 
-    let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), hex_result);
+    let encoded_string = encoded.to_string();
+
+    let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), encoded_string);
 
     Ok(dir_out)
 }
