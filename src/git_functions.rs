@@ -222,23 +222,14 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                         
                         if(metadata.is_file()) {
 
-                        let content = fs::read_to_string(entry.path()).unwrap();
-
-                        let hash_input = format!("100644 {}", content);
-
-                        let mut hasher = Sha1::new();
-                        hasher.update(hash_input.as_bytes());
-            
-                        let object_hash = hasher.finalize();
-            
-                        let hex_result = hex::encode(object_hash);
-                        
-
-                        entries.push(format!("100644 {}\0{}", filename, hex_result));
+                            let hex_result = utils::compute_file_hash(&entry.path()).unwrap();
+                            
+                            entries.push(format!("100644 {}\0{}", filename, hex_result));
 
                         }
                         else if (metadata.is_dir()) {
-                            entries.push(format!("40000 {}\0 asd", filename));
+                            
+                            entries.push(utils::process_directory(&entry.path()).unwrap());
                         }
 
                     }
