@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "lldb",
             "request": "attach",
@@ -26,7 +27,8 @@
                     "kind": "bin"
                 }
             },
-            "args": ["ls-tree", "8a3b19a4e3eb2e527bc84c702d81d781657683df"],
+            //"args": ["ls-tree", "8a3b19a4e3eb2e527bc84c702d81d781657683df"],
+            "args": ["write-tree"],
             "cwd": "${workspaceFolder}/test_dir2"   
         },
         {
