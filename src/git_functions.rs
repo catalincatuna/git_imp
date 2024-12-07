@@ -222,9 +222,9 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                         
                         if(metadata.is_file()) {
 
-                            let hex_result = utils::compute_file_hash(&entry.path()).unwrap();
+                            let result = utils::compute_file_hash(&entry.path()).unwrap();
 
-                            entries.push(format!("100644 {}\0{}", filename, hex_result));
+                            entries.push(format!("100644 {}\0{}", filename, result));
 
                         }
                         else if (metadata.is_dir()) {

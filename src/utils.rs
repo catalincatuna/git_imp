@@ -2,6 +2,7 @@ use std::fs;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use sha1::{Digest, Sha1};
+use base64;
 
 
 
@@ -41,12 +42,10 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
 
     let object_hash = hasher.finalize();
 
-    let hex_result = hex::encode(object_hash);
-
-    let byte_str = String::from_utf8(hex::decode(&hex_result).unwrap());
+    let base64_result = base64::encode(object_hash);
     
     // Return the hash as a hexadecimal string
-    Ok(byte_str.unwrap())
+    Ok(base64_result)
 }
 
 // Function to process a directory
