@@ -249,7 +249,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                 }
             }
 
-            entries.sort();
+            //entries.sort();
 
             let mut tree = vec![];
 

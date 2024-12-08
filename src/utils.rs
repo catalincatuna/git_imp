@@ -81,7 +81,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Object>  {
         }
         
     }
-    input.sort();
+    //input.sort();
     let mut hasher = Sha1::new();
 
     hasher.update(input);
