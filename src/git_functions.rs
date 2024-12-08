@@ -249,12 +249,14 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                 }
             }
 
+            entries.sort();
+
             let mut tree = vec![];
 
             //tree.push("tree ".as_bytes());
             tree.extend_from_slice(b"tree ");
 
-            tree.extend_from_slice(&entries.len().to_le_bytes());
+            tree.extend_from_slice(&entries.len().to_be_bytes());
 
             tree.push(0);
 
