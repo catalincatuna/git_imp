@@ -1,9 +1,12 @@
 use std::fs;
 use std::io::prelude::*;
 use std::path::PathBuf;
+use clap::Error;
 use sha1::{Digest, Sha1};
 use base64;
 use ascii85::encode;
+
+use crate::data::Object;
 
 
 pub fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
@@ -31,7 +34,7 @@ pub fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
     results
 }
 // Function to compute the hash of a file
-pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
+pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
 
     let content = fs::read(path)?; // Read raw bytes
     let string_content = String::from_utf8_lossy(&content).to_string(); // Convert to String, replacing invalid bytes
@@ -45,16 +48,18 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
 
     let object_hash = hasher.finalize();
 
-    let encoded = encode(object_hash.as_slice());
+    let array: [u8; 20] = object_hash.as_slice().try_into().expect("SHA-1 hash should be 20 bytes");
 
-    let encoded_string = encoded.to_string();
+    // let encoded = encode(object_hash.as_slice());
 
-    Ok(encoded_string)
+    // let encoded_string = encoded.to_string();
+
+    Ok(array)
 }
 
 // Function to process a directory
-pub fn process_directory(dir: &PathBuf) -> anyhow::Result<String>  {
-    let mut input = vec![];
+pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Object>  {
+    let mut input = Vec::new();
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
@@ -62,27 +67,42 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<String>  {
 
         if metadata.is_dir() {
             // If it's a directory, process it recursively
-            input.push(process_directory(&path)?);
+            input.extend(process_directory(&path).unwrap().serialize());
         } else if metadata.is_file() {
+
+            let obj = Object {
+                mode: String::from("100644"),
+                name: entry.file_name().into_string().unwrap(),
+                hash: compute_file_hash(&path).unwrap()
+            };
             // If it's a file, add its hash to the input for the final hash
-            input.push(format!("100644 {} {}",entry.file_name().into_string().unwrap(), compute_file_hash(&path).unwrap()));
+            input.extend(obj.serialize());
+            
         }
         
     }
     let mut hasher = Sha1::new();
 
-    hasher.update(input.concat().as_bytes());
+    hasher.update(input);
 
     let object_hash = hasher.finalize();
 
-    let encoded = encode(object_hash.as_slice());
+    // let encoded = encode(object_hash.as_slice());
 
-    let encoded_string = encoded.to_string();
+    // let encoded_string = encoded.to_string();
+    let array: [u8; 20] = object_hash.as_slice().try_into().expect("SHA-1 hash should be 20 bytes");
 
-    let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), encoded_string);
+    let obj = Object {
+        mode: String::from("40000"),
+        name: dir.file_name().unwrap().to_os_string().into_string().unwrap(),
+        hash: array
+    };
 
+    //let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), array);
 
-    Ok(dir_out)
+    //println!("{:?}", obj);
+
+    Ok(obj)
 }
 
 pub fn extract_filename(input: String) -> String {

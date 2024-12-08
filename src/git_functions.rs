@@ -19,6 +19,7 @@ use walkdir::WalkDir;
 mod utils;
 
 use crate::data::Command;
+use crate::data::Object;
 
 pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
 
@@ -221,17 +222,24 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                         let metadata = fs::metadata(entry.path()).unwrap();
 
                         let filename = entry.file_name().into_string().unwrap();
-                        
-                        if(metadata.is_file()) {
 
+                      
+                        if(metadata.is_file()) {
+  
                             let result = utils::compute_file_hash(&entry.path()).unwrap();
 
-                            entries.push(format!("100644 {}\0{}", filename, result));
+                            let obj = Object {
+                                mode: String::from("100644"),
+                                name: filename,
+                                hash: result
+                            };
+
+                            entries.extend(obj.serialize());
 
                         }
                         else if (metadata.is_dir()) {
                             
-                            entries.push(utils::process_directory(&entry.path()).unwrap());
+                            entries.extend(utils::process_directory(&entry.path()).unwrap().serialize());
                         }
 
                     }
@@ -241,17 +249,28 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                 }
             }
 
-            let tree = format!("tree {}\0{}", entries.concat().len(), entries.concat());
+            let mut tree = vec![];
+
+            //tree.push("tree ".as_bytes());
+            tree.extend_from_slice(b"tree ");
+
+            tree.extend_from_slice(&entries.len().to_le_bytes());
+
+            tree.push(0);
+
+            tree.extend_from_slice(&entries);
+
+            //let tree = format!("tree {}\0{}", entries.len(), entries);
 
             //println!("{:?}", tree);
             let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
             
-            e.write_all(&tree.as_bytes())?;
+            e.write_all(&tree)?;
 
             let compressed = e.finish()?;
 
             let mut hasher = Sha1::new();
-            hasher.update(&tree.as_bytes());
+            hasher.update(&tree);
 
             let object_hash = hasher.finalize();
 

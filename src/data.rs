@@ -9,6 +9,23 @@ pub struct Args {
     pub command: Command,
 }
 
+pub struct Object {
+    pub mode: String,
+    pub name: String,
+    pub hash: [u8; 20]
+}
+
+impl Object {   
+    // Serialize
+    pub fn serialize(&self) -> Vec<u8> {
+        let mut data = Vec::new();
+        data.extend_from_slice(&self.mode.as_bytes()); // Add field1 as bytes
+        data.extend_from_slice(self.name.as_bytes());    // Add field2 as bytes
+        data.extend_from_slice(&self.hash);    // Add field2 as bytes
+        data
+    }
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Command {
     Init,
