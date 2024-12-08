@@ -256,7 +256,12 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
             //tree.push("tree ".as_bytes());
             tree.extend_from_slice(b"tree ");
 
-            tree.extend_from_slice(&entries.len().to_be_bytes());
+            let len:u8 = (entries.len() & 0xFF) as u8;
+
+            // Wrap the single byte in a slice
+            let byte_slice: &[u8] = &[len];
+            //println!("{:?}", byte_slice);
+            tree.extend_from_slice(&byte_slice);
 
             tree.push(0);
 
