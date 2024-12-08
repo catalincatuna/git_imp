@@ -45,10 +45,11 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<String> {
 
     let object_hash = hasher.finalize();
 
-     let base64_result = base64::encode(object_hash);
-    
-    // Return the hash as a hexadecimal string
-    Ok(base64_result)
+    let encoded = encode(object_hash.as_slice());
+
+    let encoded_string = encoded.to_string();
+
+    Ok(encoded_string)
 }
 
 // Function to process a directory
@@ -74,13 +75,12 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<String>  {
 
     let object_hash = hasher.finalize();
 
-    let base64_result = base64::encode(object_hash);
+    let encoded = encode(object_hash.as_slice());
 
-    // let encoded = encode(object_hash.as_slice());
+    let encoded_string = encoded.to_string();
 
-    // let encoded_string = encoded.to_string();
+    let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), encoded_string);
 
-    let dir_out = format!("40000 {} {}", dir.file_name().unwrap().to_os_string().into_string().unwrap(), base64_result);
 
     Ok(dir_out)
 }
