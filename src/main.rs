@@ -36,3 +36,15 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    // Bring the `add` function from the parent module into scope
+    use super::*;
+
+    #[test]
+    fn test1() {
+        let result = git_functions::execute_git_function(Command::Init).unwrap_or(()); // Now `add` is accessible
+        assert_eq!(result, ());
+    }
+}

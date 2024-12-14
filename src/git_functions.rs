@@ -145,7 +145,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
             let mut size: usize = 0;
 
             if let Some(s) = header.strip_prefix("tree ") {
-                size = s.parse::<usize>().unwrap();
+                size = s.parse::<usize>().unwrap_or(u8::MAX.into());
             } else {
                 println!("not a tree");
             }
@@ -229,7 +229,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                             let result = utils::compute_file_hash(&entry.path()).unwrap();
 
                             let obj = Object {
-                                mode: String::from("100644"),
+                                mode: String::from("100644 "),
                                 name: filename,
                                 hash: result
                             };
@@ -256,12 +256,12 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
             //tree.push("tree ".as_bytes());
             tree.extend_from_slice(b"tree ");
 
-            let len:u8 = (entries.len() & 0xFF) as u8;
+            let len:u16 = (entries.len() & 0xFFFF) as u16;
 
-            // Wrap the single byte in a slice
-            let byte_slice: &[u8] = &[len];
+            // // Wrap the single byte in a slice
+            // let byte_slice: &[u8] = &[len];
             //println!("{:?}", byte_slice);
-            tree.extend_from_slice(&byte_slice);
+            tree.extend_from_slice(&len.to_be_bytes());
 
             tree.push(0);
 

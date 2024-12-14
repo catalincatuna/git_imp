@@ -71,7 +71,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Object>  {
         } else if metadata.is_file() {
 
             let obj = Object {
-                mode: String::from("100644"),
+                mode: String::from("100644 "),
                 name: entry.file_name().into_string().unwrap(),
                 hash: compute_file_hash(&path).unwrap()
             };
@@ -94,7 +94,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Object>  {
     let array: [u8; 20] = object_hash.as_slice().try_into().expect("SHA-1 hash should be 20 bytes");
 
     let obj = Object {
-        mode: String::from("40000"),
+        mode: String::from("40000 "),
         name: dir.file_name().unwrap().to_os_string().into_string().unwrap(),
         hash: array
     };

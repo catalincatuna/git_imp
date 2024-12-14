@@ -15,7 +15,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'git-starter-rust'",
+            "name": "run rust write-tree",
             "cargo": {
                 "args": [
                     "build",
@@ -29,6 +29,25 @@
             },
             //"args": ["ls-tree", "8a3b19a4e3eb2e527bc84c702d81d781657683df"],
             "args": ["write-tree"],
+            "cwd": "${workspaceFolder}/test_dir2"   
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "run rust ls-tree",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=git-starter-rust",
+                    "--package=git-starter-rust"
+                ],
+                "filter": {
+                    "name": "git-starter-rust",
+                    "kind": "bin"
+                }
+            },
+            //"args": ["ls-tree", "8a3b19a4e3eb2e527bc84c702d81d781657683df"],
+            "args": ["ls-tree", "52766fdc14a773b786f6f460e07f31034d3a02f0"],
             "cwd": "${workspaceFolder}/test_dir2"   
         },
         {
