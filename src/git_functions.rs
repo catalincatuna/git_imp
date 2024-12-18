@@ -3,6 +3,7 @@ use anyhow::Context;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use sha1::{Digest, Sha1};
+use utils::process_directory;
 use core::hash;
 #[allow(unused_imports)]
 use std::env;
@@ -192,112 +193,10 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
 
             let current_dir = std::env::current_dir()?;
             
-            //let parent_dir = current_dir.parent().unwrap();
-            
-            let mut entries = vec![];
+            let tree_hash = hex::encode(process_directory(&current_dir).unwrap());
 
-
-            // for entry in WalkDir::new(current_dir) {
-            //     match entry {
-
-            //         Ok(entry) => {
-            //             let filename = utils::extract_filename(entry.path().to_string_lossy().to_string());
-            //             //=println!("{:?}", &filename);
-            //             entries.push(filename);
-            //         }
-            //         Err(e) => {
-            //             println!("error {}", e);
-            //         }
-                    
-            //     };
-            // }
-
-            // println!("{:?}", current_dir);
-
-            for entry in fs::read_dir(current_dir).unwrap() {
-                match entry {
-
-                    Ok(entry) => {
-
-                        let metadata = fs::metadata(entry.path()).unwrap();
-
-                        let filename = entry.file_name().into_string().unwrap();
-
-                      
-                        if(metadata.is_file()) {
-  
-                            let result = utils::compute_file_hash(&entry.path()).unwrap();
-
-                            let obj = Object {
-                                mode: String::from("100644 "),
-                                name: filename,
-                                hash: result
-                            };
-
-                            entries.extend(obj.serialize());
-
-                        }
-                        else if (metadata.is_dir()) {
-                            
-                            entries.extend(utils::process_directory(&entry.path()).unwrap().serialize());
-                        }
-
-                    }
-                    Err(e) => {
-                        println!("error {}", e);
-                    }
-                }
-            }
-
-            //entries.sort();
-
-            let mut tree = vec![];
-
-            //tree.push("tree ".as_bytes());
-            tree.extend_from_slice(b"tree ");
-
-            let len:u16 = (entries.len() & 0xFFFF) as u16;
-
-            // // Wrap the single byte in a slice
-            // let byte_slice: &[u8] = &[len];
-            //println!("{:?}", byte_slice);
-            tree.extend_from_slice(&len.to_be_bytes());
-
-            tree.push(0);
-
-            tree.extend_from_slice(&entries);
-
-            //let tree = format!("tree {}\0{}", entries.len(), entries);
-
-            //println!("{:?}", tree);
-            let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-            
-            e.write_all(&tree)?;
-
-            let compressed = e.finish()?;
-
-            let mut hasher = Sha1::new();
-            hasher.update(&tree);
-
-            let object_hash = hasher.finalize();
-
-            let hex_result = hex::encode(object_hash);
-
-            println!("{}", hex_result);
-
-            let path = format!(".git/objects/{}", &hex_result[..2]);
-
-            let tree_path = format!("{}/{}", path, &hex_result[2..]);
-
-            if !fs::metadata(&path).is_ok() {
-                // Create the directory if it doesn't exist
-                fs::create_dir(&path)?;
-            } else {
-                // do nothing
-            }
-
-            fs::write(tree_path, compressed)?;
-
+            println!("{}", tree_hash);
+        
 
         }
         _ => {
