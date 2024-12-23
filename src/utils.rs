@@ -63,17 +63,9 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
 
 // Function to process a directory
 pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
+    let mut input = vec![];
     let mut tree = vec![];
-    let mut size: usize = 100;
-
-    //tree.push("tree ".as_bytes());
-    tree.extend_from_slice(b"tree ");
-
-    let usize_position = tree.len();
-
-    tree.extend_from_slice(&size.to_be_bytes());
-
-    tree.push(0);
+    let mut aux = vec![];
 
     // let mut entries: Vec<_> = fs::read_dir(dir)?.collect::<Result<_, _>>()?;
     let mut entries: Vec<_> = fs::read_dir(dir)?.filter_map(|res| res.ok()).collect();
@@ -92,16 +84,18 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
                         hash: process_directory(&path).unwrap(),
                     };
                     // If it's a directory, process it recursively
-                    tree.extend(obj.serialize());
-                    size = size + calculate_total_size(&obj);
+                    // input.extend(obj.serialize());
+                    input.push(obj);
+                    //size = size + calculate_total_size(&obj);
                 } else if metadata.is_file() {
                     let obj = Object {
                         mode: String::from("100644 "),
                         name: entry.file_name().into_string().unwrap(),
                         hash: compute_file_hash(&path).unwrap(),
                     };
-                    tree.extend(obj.serialize());
-                    size = size + calculate_total_size(&obj);
+                    // input.extend(obj.serialize());
+                    input.push(obj);
+                    //size = size + calculate_total_size(&obj);
                     // If it's a file, add its hash to the input for the final hash
                 }
             }
@@ -111,8 +105,26 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
         }
     }
 
-    // replace initial size with actual sizeF
-    let size_bytes = size.to_be_bytes();
+
+    for i in &input {
+        write!(&mut aux, "{:?}", i.serialize())?;
+        //i.display();
+    }
+
+    //tree.push("tree ".as_bytes());
+    // tree.extend_from_slice(b"tree ");
+    write!(&mut tree, "tree ")?;
+    write!(&mut tree, "{}", aux.len())?;
+    tree.push(0);
+
+    for i in &input {
+        write!(&mut tree, "{} ", i.mode)?;
+        write!(&mut tree, "{}", i.name)?;
+        tree.push(0);
+        write!(&mut tree, "{:?}", i.hash)?;
+    }
+    // // replace initial size with actual sizeF
+    // let size_bytes = size.to_be_bytes();
 
     // tree[usize_position..usize_position + std::mem::size_of::<usize>()]
     //     .copy_from_slice(&size_bytes);
@@ -124,17 +136,23 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
     //     println!("The bytes are not valid UTF-8!");
     // }
 
- 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+
+    
+    //let s = String::from("salut");
+    //let s = String::from_utf8_lossy(&compressed).to_string();
+
 
     e.write_all(&tree)?;
 
     let compressed = e.finish()?;
 
+
+
     //input.sort();
     let mut hasher = Sha1::new();
 
-    hasher.update(tree);
+    hasher.update(&mut tree);
 
     let object_hash = hasher.finalize();
 

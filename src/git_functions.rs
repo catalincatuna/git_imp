@@ -146,7 +146,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
             let mut size: usize = 0;
 
             if let Some(s) = header.strip_prefix("tree ") {
-                size = s.parse::<usize>().unwrap_or(u8::MAX.into());
+                size = s.parse::<usize>().unwrap();
             } else {
                 println!("not a tree");
             }
@@ -170,6 +170,7 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
                                  .map(|c| {if c.is_ascii() || c.is_alphanumeric() {c} else {'/'}})
                                  .collect::<String>();
                 
+                // println!("{:?}", string_data);
 
                 let patterns = &["100644", "0100755", "40000"];
 

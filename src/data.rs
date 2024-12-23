@@ -21,8 +21,12 @@ impl Object {
         let mut data = Vec::new();
         data.extend_from_slice(&self.mode.as_bytes()); // Add field1 as bytes
         data.extend_from_slice(self.name.as_bytes());    // Add field2 as bytes
-        data.extend_from_slice(&self.hash);    // Add field2 as bytes
+        data.extend_from_slice(&self.hash);    // Add field3 as bytes
         data
+    }
+
+    pub fn display(&self) {
+        println!("{} / {} / {:?}", self.mode, self.name, self.hash.to_ascii_lowercase());
     }
 }
 
