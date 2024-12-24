@@ -38,14 +38,14 @@ pub fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
 }
 // Function to compute the hash of a file
 pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
-    let content = fs::read(path)?; // Read raw bytes
-    let string_content = String::from_utf8_lossy(&content).to_string(); // Convert to String, replacing invalid bytes
+
+    let contents = std::fs::read_to_string(&file_path)?;
+
+    let blob = format!("blob {}\0{}", contents.len(), contents);
 
     let mut hasher = Sha1::new();
 
-    let hash_input = format!("100644 {}", string_content);
-
-    hasher.update(hash_input.as_bytes());
+    hasher.update(blob.as_bytes());
 
     let object_hash = hasher.finalize();
 
@@ -79,7 +79,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
             Ok(metadata) => {
                 if metadata.is_dir() {
                     let obj = Object {
-                        mode: String::from("040000 "),
+                        mode: String::from("40000 "),
                         name: entry.file_name().into_string().unwrap(),
                         hash: process_directory(&path).unwrap(),
                     };
