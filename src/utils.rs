@@ -121,7 +121,8 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
         write!(&mut tree, "{} ", i.mode)?;
         write!(&mut tree, "{}", i.name)?;
         tree.push(0);
-        write!(&mut tree, "{:?}", i.hash)?;
+        // write!(&mut tree, "{}", i.hash)?;
+        tree.extend_from_slice(&i.hash);
     }
     // // replace initial size with actual sizeF
     // let size_bytes = size.to_be_bytes();
