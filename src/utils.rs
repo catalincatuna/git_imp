@@ -176,6 +176,8 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<[u8; 20]> {
 
     fs::write(tree_path, compressed)?;
 
+
+
     // let encoded = encode(object_hash.as_slice());
 
     // let encoded_string = encoded.to_string();
