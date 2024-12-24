@@ -39,7 +39,7 @@ pub fn extract_after_numeric(input: String, patterns: &[&str]) -> Vec<String> {
 // Function to compute the hash of a file
 pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
 
-    let contents = std::fs::read_to_string(&file_path)?;
+    let contents = std::fs::read_to_string(&path).unwrap_or(' '.to_string());
 
     let blob = format!("blob {}\0{}", contents.len(), contents);
 
