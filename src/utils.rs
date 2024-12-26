@@ -47,11 +47,11 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
     
     write!(&mut blob, "blob {}\0{:?}", contents.len(), contents.as_bytes())?;
 
-    let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+    // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-    e.write_all(&blob)?;
+    // e.write_all(&blob)?;
 
-    let compressed = e.finish()?;
+    // let compressed = e.finish()?;
 
     let mut hasher = Sha1::new();
 
@@ -200,9 +200,10 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Option<[u8; 20]>> {
     //     //i.display();
     // }
 
-    let mut reader = Cursor::new(&input);
+    // let mut reader = Cursor::new(&input);
     write!(&mut tree, "tree {}\0", input.len() as u64)?;
-    std::io::copy(&mut reader, &mut tree).context("stream file into tree")?;
+    // std::io::copy(&mut reader, &mut tree).context("stream file into tree")?;
+    write!(&mut tree,"{:?}",input)?;
     //tree.push("tree ".as_bytes());
     // tree.extend_from_slice(b"tree ");
     // write!(&mut tree, "tree ")?;
