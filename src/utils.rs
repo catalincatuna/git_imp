@@ -55,7 +55,7 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
 
     let mut hasher = Sha1::new();
 
-    hasher.update(compressed);
+    hasher.update(&blob);
 
     let object_hash = hasher.finalize();
 
@@ -246,7 +246,7 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Option<[u8; 20]>> {
     //input.sort();
     let mut hasher = Sha1::new();
 
-    hasher.update(&compressed);
+    hasher.update(&tree);
 
     let object_hash = hasher.finalize();
 
