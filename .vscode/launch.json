@@ -47,7 +47,7 @@
                 }
             },
             //"args": ["ls-tree", "8a3b19a4e3eb2e527bc84c702d81d781657683df"],
-            "args": ["ls-tree", "4bd28f9acce2b989dab5085e2dd6f5925e5f6b64"],
+            "args": ["ls-tree", "01b3dc22af83b5cdb282c7004953b4789ed46126"],
             "cwd": "${workspaceFolder}/test_dir2"   
         },
         {

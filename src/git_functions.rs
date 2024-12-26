@@ -194,7 +194,13 @@ pub fn execute_git_function(cmd: Command) -> anyhow::Result<()>{
 
             let current_dir = std::env::current_dir()?;
             
-            let tree_hash = hex::encode(process_directory(&current_dir).unwrap());
+            let tree_hash = match process_directory(&current_dir).unwrap() {
+                Some(hash) => hex::encode(hash),
+                None => {
+                    println!("Failed to process directory");
+                    return Err(anyhow::anyhow!("Failed to process directory"));
+                }
+            };
 
             println!("{}", tree_hash);
         
