@@ -45,7 +45,7 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
     let contents = std::fs::read_to_string(&path).unwrap_or(' '.to_string());
     let mut blob = vec![];
     
-    write!(&mut blob, "blob {}\0{:?}", contents.len(), contents.as_bytes())?;
+    write!(&mut blob, "blob {}\0{:?}", contents.len() as u64, contents.as_bytes())?;
 
     // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
