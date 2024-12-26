@@ -203,7 +203,6 @@ pub fn process_directory(dir: &PathBuf) -> anyhow::Result<Option<[u8; 20]>> {
     let mut reader = Cursor::new(&input);
     write!(&mut tree, "tree {}\0", input.len() as u64)?;
     std::io::copy(&mut reader, &mut tree).context("stream file into tree")?;
-    println!("{:?}", &tree.to_ascii_lowercase());
     //tree.push("tree ".as_bytes());
     // tree.extend_from_slice(b"tree ");
     // write!(&mut tree, "tree ")?;
