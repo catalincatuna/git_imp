@@ -47,17 +47,31 @@ pub fn compute_file_hash(path: &PathBuf) -> anyhow::Result<[u8; 20], Error> {
     
     write!(&mut blob, "blob {}\0{:?}", contents.len() as u64, contents.as_bytes())?;
 
-    // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+    let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-    // e.write_all(&blob)?;
+    e.write_all(&blob)?;
 
-    // let compressed = e.finish()?;
+    let compressed = e.finish()?;
 
     let mut hasher = Sha1::new();
 
     hasher.update(&blob);
 
     let object_hash = hasher.finalize();
+
+    let hex_result = hex::encode(object_hash);
+
+    let path = format!(".git/objects/{}", &hex_result[..2]);
+
+    let blob_path = format!("{}/{}", path, &hex_result[2..]);
+
+    if !fs::metadata(&path).is_ok() {
+        // Create the directory if it doesn't exist
+        fs::create_dir(&path)?;
+    } else {
+        // do nothing
+    }
+    fs::write(blob_path, compressed)?;
 
     Ok(object_hash.into())
 }
